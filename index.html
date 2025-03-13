@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.5" />
+
+    <title>Oath Dice Roller</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Metamorphous&family=Sorts+Mill+Goudy:ital@0;1&display=swap" rel="stylesheet">
+
+    <style>
+        html * {
+            box-sizing: border-box;
+        }
+
+        body {
+            --radius: 0.5rem;
+
+            --attack: #e22b07;
+            --attack-light: #f7a394;
+            --attack-dark: #6c1200;
+
+            --defence: #009ad7;
+            --defence-light: #bbe1ed;
+            --defence-dark: #004560;
+
+            --color: #2f2d2b;
+
+            --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='nf'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23nf)' /%3E%3C/svg%3E");
+        }
+
+        .grainy {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grainy > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .grainy::before {
+            content: "";
+            position: absolute;
+
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+
+            background-image: var(--grain);
+            background-size: 100px;
+            background-repeat: repeat;
+
+            display: block;
+            mix-blend-mode: soft-light;
+            z-index: 1;
+        }
+
+        .defence {
+            --color: var(--defence);
+            --color-light: var(--defence-light);
+            --color-dark: var(--defence-dark);
+
+            --fill: radial-gradient(farthest-corner at -17% -25%, var(--color-light) 0%, var(--color) 50%);
+            --background: radial-gradient(farthest-corner at -50% -50%, var(--color) 0%, var(--color-light) 20%);
+        }
+
+        .attack {
+            --color: var(--attack);
+            --color-light: var(--attack-light);
+            --color-dark: var(--attack-dark);
+
+            --fill: radial-gradient(farthest-corner at -17% -25%, var(--color-light) 0%, var(--color) 50%);
+            --background: radial-gradient(farthest-corner at -50% -50%, var(--color) 0%, var(--color-light) 20%);
+        }
+
+        .rows {
+            display: flex;
+            padding: 10px;
+            flex-direction: column;
+        }
+
+        .rows > * {
+            margin-top: 10px;
+        }
+
+        .rows > *:first-child {
+            margin-top: unset;
+        }
+
+        .cols {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cols > * {
+            margin-left: 5px;
+        }
+
+        .cols > *:first-child {
+            margin-left: unset;
+        }
+
+        .box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .space-evenly {
+            justify-content: space-evenly;
+        }
+
+        .space-start {
+            justify-content: start;
+        }
+
+        .space-end {
+            justify-content: end;
+        }
+
+        .card {
+            border-radius: var(--radius);
+
+            border-color: var(--color);
+            color: var(--color-dark);
+
+            background: var(--background);
+
+            box-shadow: 0 0 20px inset rgba(0, 0, 0, 0.1);
+        }
+
+        .fill {
+            background: var(--fill);
+            color: white;
+            fill: white;
+        }
+
+        .result {
+            font-size: 3rem;
+
+            background: linear-gradient(90deg, rgba(187,225,237,1) 0%, rgba(247,163,148,1) 100%);
+        }
+
+        .result .die-face {
+            width: 4rem;
+            height: 4rem;
+        }
+
+        .result .side {
+            color: var(--color-dark);
+            fill: var(--color-dark);
+        }
+
+        .outcome {
+            background: black;
+            color: white;
+
+            background: var(--color);
+        }
+
+        .die-face {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            padding: 0;
+
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .die-face svg {
+            opacity: 0.9;
+        }
+
+        .no-bg {
+            background: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        html,
+        body {
+            min-height: 100vh;
+            margin: 0;
+
+            background: radial-gradient(farthest-corner at -50% -50%, #fff 0%, #e6e0d9 100%);
+        }
+
+        body {
+            font-family: "Sorts Mill Goudy", serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            color: var(--color);
+        }
+
+        main {
+            width: 100%;
+            max-width: 500px;
+            flex: 1;
+        }
+
+        footer {
+            width: 100%;
+            padding: 10px;
+
+            background: var(--color);
+
+            color: white;
+
+            text-align: center;
+        }
+
+        a,
+        a:visited {
+            color: inherit;
+        }
+
+        h1,
+        input,
+        button {
+            font-family: "Metamorphous", serif;
+        }
+
+        h1 {
+            margin: 0;
+            text-align: center;
+            font-size: 3rem;
+        }
+
+        input {
+            background: none;
+            color: inherit;
+            border: none;
+            height: 2rem;
+            max-width: 3ch;
+            font-size: 1.5rem;
+            margin: 0;
+            padding: 5px;
+
+            border-radius: var(--radius);
+        }
+
+        input[type="number"] {
+            -moz-appearance:textfield;
+        }
+
+        input[type="checkbox"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            display: inline-block;
+
+            border: 1px solid var(--color);
+
+            width: 2rem;
+            height: 2rem;
+
+            cursor: pointer;
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--fill);
+        }
+
+        button {
+            border: none;
+            background: none;
+            padding: 10px;
+            border-radius: var(--radius);
+
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        button:hover,
+        button:focus,
+        input:hover,
+        input:focus {
+            box-shadow: 0 0px 25px inset rgba(255, 255, 255, 0.5);
+        }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <main id="app" class="rows">
+        <div class="rows defence">
+            <section class="card rows grainy">
+                <h1>Defender</h1>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="defence-warbands" type="number" pattern="\d*" min="0" v-model="defenceWarbands" />
+                        <label for="defence-warbands">Warbands</label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="defenceWarbands = dec(defenceWarbands)" title="Subtract defending warband">-</button>
+                        <button class="box die-face fill grainy" @click="defenceWarbands = inc(defenceWarbands)" title="Add defending warband">+</button>
+                    </div>
+                </div>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="defence-dice" type="number" pattern="\d*" min="0" v-model="defenceDice" />
+                        <label for="defence-dice">Pool</label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="defenceDice = dec(defenceDice)" title="Subtract defence die">-</button>
+                        <button class="box die-face fill grainy" @click="defenceDice = inc(defenceDice)" title="Add defence die">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card rows grainy">
+                <div class="cols">
+                    <div class="cols">
+                        <input id="defence-blank" type="number" pattern="\d*" min="0" v-model="defencePool.blank" />
+                        <label for="defence-blank" class="box die-face fill" title="Blank"></label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="defencePool.blank = dec(defencePool.blank)" title="Subtract blank defence roll">-</button>
+                        <button class="box die-face fill grainy" @click="defencePool.blank = inc(defencePool.blank)" title="Add blank defence roll">+</button>
+                    </div>
+                </div>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="defence-one" type="number" pattern="\d*" min="0" v-model="defencePool.one" />
+                        <label for="defence-one" class="box die-face fill" title="+1">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="2rem" height="2rem">
+                                <path d="M96.4,160.4c-12.1,1.7-38.1-29-43.5-39.3-5.5-10.4-15.5-37.5-6.2-46.7,9.4-2.6,50.3-34.8,55.4-34.8s3.1.8,4.3,1.5c3.9,2.1,44.6,34.4,47.5,37.7,8.1,9.1-1.2,28.3-6.4,37.8s-18.8,25.1-30.7,32.9c-2.7,1.8-18.4,10.7-20.5,11ZM103.3,141.8c8.6-1,27.4-24.3,31.6-32.2s8.5-15,5-19.7c-5.1-2.5-32.1-28.3-34.3-28.4s-1.9.5-2.2,1.6c-.3,13.6-.5,27.4-1.2,41.1s-4.6,33.7-1.5,36.7,1.4,1,2.7.8Z"/>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="defencePool.one = dec(defencePool.one)" title="Subtract defence +1 roll">-</button>
+                        <button class="box die-face fill grainy" @click="defencePool.one = inc(defencePool.one)" title="Add defence +1 roll">+</button>
+                    </div>
+                </div>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="defence-two" type="number" pattern="\d*" min="0" v-model="defencePool.two" />
+                        <label for="defence-two" class="box die-face fill" title="+2">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="2rem" height="2rem">
+                                <path d="M61.6,120c-7.7,1.4-24.4-14.1-29.7-19.8-9.8-10.8-27.3-42.9-21.8-57.1S52.5,15.9,59.1,7.7c4.9-3.2,9.6,1.3,13.4,3.9,9.8,6.6,30,21.5,38.3,29.2s5.5,5.1,5.4,10.2c-.2,11.4-12.3,34.2-19.6,43.1s-26.5,24.2-35,25.8ZM77.4,34.6c-2.4-1.9-10.8-12.1-12.1-6,1.4,7.8-3.7,71.7.6,72.9,8.8,2.5,38.1-37.8,35.5-48.7-8.4-5.5-16-12.1-23.9-18.2Z"/>
+                                <path d="M127.6,86.5c4-2.8,8.1-8.5,13.9-5.7,12.2,12.6,31.2,21.3,43.3,33,9.2,8.8,6.2,13.8,2.4,24.9-6.3,18.6-21.3,37-37.7,47.5-4.8,3-12.8,8.8-18.3,6.7-14.9-5.7-36.2-32.3-42.1-47.1-2.9-7.2-8.6-24.4-3.2-31,14.1-9.2,27.8-18.9,41.6-28.4ZM138.8,177c3.4,3.3,20-13.1,22.5-16.2,4.4-5.5,19.2-29.2,14.7-35.2l-33.8-25-3.4,76.4Z"/>
+                                </svg>
+                        </label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="defencePool.two = dec(defencePool.two)" title="Subtract +2 defence roll">-</button>
+                        <button class="box die-face fill grainy" @click="defencePool.two = inc(defencePool.two)" title="Add +2 defence roll">+</button>
+                    </div>
+                </div>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="defence-double" type="number" pattern="\d*" min="0" v-model="defencePool.double" />
+                        <label for="defence-double" class="box die-face fill" title="×2">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="2rem" height="2rem">
+                                <path d="M103,181.6c-6.8,1-25.7-12.4-31.5-17-22.2-17.5-47.7-54.5-50.1-83.1-.7-7.9-.2-10,5.5-15.2,11.3-10.4,49.8-36,63.8-43.9s8.4-5.6,15.3-2c13.5,7.2,53.4,36,65.2,46.4s6.1,26,.6,40.5c-8.3,21.7-22.4,40.9-40.2,55.8-4.9,4.1-23.3,17.7-28.6,18.5ZM100.8,120c-2.7,1.2-17.5,1.7-19.9.8-5.5-2,1.1-12.6-5.1-12.6s-3.6,10.2-5.8,11.9c-3.4,2.6-14.2-1.5-14.3,3.3s34.9,40.8,42.1,42.2c9.3,1.8,36.9-28.1,42.6-35.9s22.8-38.7,22.2-47.4c-.4-5.4-53.4-40.6-60.5-47.3-22,13.4-42.7,29.7-63.5,44.9-2.1,4.9,5.8,23.5,8.4,28.7s2.4,6.6,6.2,6.6,15.2-14,15.2-16.3c-.2-3.5-17.5-16.7-12.8-19.6,9.9.5,25.7-6.1,20.6,9.8,6.5,3.5,6.6-9,7.8-9.8,1.9-1.4,18.5-2,15.3,5.4s-14.5,11.6-14.3,14.1c.5,6,13.5,12.9,15.2,16.3s.2,3.4.5,4.9c3-1.3,17.8-22.5,20-26.5,3.1-5.8,10.9-19.4-.9-20.5-8.3-.8-9.6,6-17.1,4.9-4.9-17.5,23.1-22,32.3-10.2s-6.5,32.4-14.7,45.5c3.6-.1,6.3,1.2,10,.8s13.4-9.8,15.3-3c.7,2.5-7.2,17.2-10.2,17.9s-30.6.4-32.2-.1c-2.8-1-2.1-6.5-2.6-8.7Z"/>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="defencePool.double = dec(defencePool.double)" title="Subtract ×2 defence roll">-</button>
+                        <button class="box die-face fill grainy" @click="defencePool.double = inc(defencePool.double)" title="Add ×2 defence roll">+</button>
+                    </div>
+                </div>
+
+                <button class="box fill grainy" @click="defenceRoll">Re-roll {{ defenceDice }} defence {{ defenceDice === 1 ? "die" : "dice" }}</button>
+            </section>
+        </div>
+
+        <div class="rows attack">
+            <section class="card rows grainy">
+                <h1>Attacker</h1>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="attack-warbands" type="number" pattern="\d*" min="0" v-model="attackWarbands" />
+                        <label for="attack-warbands">Warbands</label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="attackWarbands = dec(attackWarbands)" title="Subtract attacking warband">-</button>
+                        <button class="box die-face fill grainy" @click="attackWarbands = inc(attackWarbands)" title="Add attacking warband">+</button>
+                    </div>
+                </div>
+
+                <div class="cols space-end">
+                    <label for="attack-sacrifice">Sacrifice warbands?</label>
+                    <input id="attack-sacrifice" type="checkbox" v-model="attackSacrifice" />
+                </div>
+            </section>
+            
+            <section class="card rows grainy">
+                <div class="cols">
+                    <div class="cols">
+                        <input id="attack-hollow" type="number" pattern="\d*" min="0" v-model="attackPool.hollow" />
+                        <label for="attack-hollow" class="box die-face fill" title="Hollow">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="2rem" height="2rem">
+                                <path d="M45.3,134.6c2.8-3.7,18-13.6,18.3-17.5.5-5.9-25.1-17.6-8.4-28.8s12.1,10,21,6.3,11.6-14.3,14.7-17.6c16.6-17.9,33.2-33.5,57.6-39.4,13.5-3.2,8.6,10.5,6.5,18.4-7.5,28.3-33.2,44.4-50.1,66.6-1.6,6.2,19.5,13.1,4,24.5s-15.3-6-23-9.3c-8.9-3.8-14.5,21-18.5,23.6-8.1,5.1-16.9-3.6-21.6-9.8s-5.5-10.5-.6-16.9ZM59.7,97.1c-3.2,3.3,14.9,16,14.7,21-.2,5.7-22.4,18.9-24.1,25.1s4.6,8.1,5.8,8.8c8.2,4.7,7.9-4.9,10.9-9.8,1.3-2.1,13.5-16.4,14.8-16.6,5.4-.8,15.9,17.5,22.7,13.4s-14.6-13.3-8.9-19.2c17.2-23.3,48.1-40.9,52.7-70.8-1.5-2.2-13.6,2.3-16.2,3.5-10,4.7-26.2,20.4-33.8,28.9-3.3,3.7-17.9,24.1-19.3,24.8-7.4,3.6-11.7-10.7-19.3-9.1Z"/>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="attackPool.hollow = dec(attackPool.hollow)" title="Subtract hollow attack roll">-</button>
+                        <button class="box die-face fill grainy" @click="attackPool.hollow = inc(attackPool.hollow)" title="Add hollow attack roll">+</button>
+                    </div>
+                </div>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="attack-one" type="number" pattern="\d*" min="0" v-model="attackPool.one" />
+                        <label for="attack-one" class="box die-face fill" title="+1">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="2rem" height="2rem">
+                                <path d="M101.8,71.7c15.7-16,33.3-30.5,56.2-33.9-10,36.6-37.9,60.2-62.6,86.9-1.1,4.8,15.1,11.5,12.1,18.9s-4.2,4.5-5.1,4.7c-8.7,2.5-15.3-13.6-22.3-17.2-1.2.2-13.8,16.3-14.8,18.2-2.5,4.7-1.8,12.4-7.8,12.8s-16.6-10.5-15.7-15.6c1.5-7.7,25.7-21.5,25.1-26.9-.5-4.2-29.3-20.5-14.5-26.2s14.8,15.1,22.2,11.5,11.4-15.8,13.7-18.6c4.2-5.1,8.6-9.9,13.3-14.6Z"/>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="attackPool.one = dec(attackPool.one)" title="Subtract +1 attack roll">-</button>
+                        <button class="box die-face fill grainy" @click="attackPool.one = inc(attackPool.one)" title="Add +1 attack roll">+</button>
+                    </div>
+                </div>
+
+                <div class="cols">
+                    <div class="cols">
+                        <input id="attack-skull" type="number" pattern="\d*" min="0" v-model="attackPool.skull" />
+                        <label for="attack-skull" class="box die-face fill" title="Skull">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="2rem" height="2rem">
+                                <path d="M47,179.7c-.6-.4-3.3-11.7-7.4-12.6l-6.9,11.7c-5.3.3-3.8-35.9-.9-41,3.5-6,28.3,0,19.9-15.2-4.8-8.8-15.5,2-16.5,1.4-2.4-7.1,4.8-15.6,10.3-19.6,18.3-13.3,48.3-4.7,55.1,17.4,2.3,7.6,3.6,31.4-.6,37.8-3.1,4.7-21.4-1.2-25.6,1.1s-1.3,15.1-5.5,17.1-9-9.5-11.6-10.7c-2.2,0-5,16.6-10.2,12.6ZM49,150.3l12.6,1.1c-.9-18.5-10.5-20-12.6-1.1ZM80.5,139.4c10.8-1.8,5.3-15-4.4-14.3-13.6,1-8.3,16.4,4.4,14.3Z"/>
+                                <path d="M60.8,80.7c-2.4-1.4-3.9-18.8-9-20s-14.8,6-16.6,7.1-3.9,6.1-7.5,6.3c-4.6.2-7-11-5.8-14.7,2-6.4,21.9-7.5,27.6-10.7,1.6-2.4-7.7-19.5-3.5-24,7.3-8,9.7,12.4,12.3,16.2,27-11,53.5-25.7,83.7-19.6.2,1.9.1,2.8-1,4.4s-16.6,12.9-19.7,14.6c-16.2,9.1-36.3,13.4-53.3,21.1-4,3.6,3.9,10.7,2.4,16s-7.2,4.8-9.5,3.5Z"/>
+                                <path d="M119.6,143.4c-4.5-16.8,17.3-5.1,19.3-10.3-2.5-29.5-1.8-59.9,16.3-84.6,3.2.9,8.1,27.6,8.3,31.8.4,8.9-1.7,17.7-2,26.4s-.7,25.9.2,28.3c1.7,4.4,15.3-2,16.5,5.1,2.5,14.4-20.6,2.6-23.1,6.3-.9,6.1-.3,13,.6,19.1.7,4.8,7.5,13.1-4.5,13.4-20.7.5-3.7-24.4-9.7-31.5-3.1-3.7-17.1-1.5-22-4Z"/>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="cols">
+                        <button class="box die-face fill grainy" @click="attackPool.skull = dec(attackPool.skull)" title="Subtract skull attack roll">-</button>
+                        <button class="box die-face fill grainy" @click="attackPool.skull = inc(attackPool.skull)" title="Add skull attack roll">+</button>
+                    </div>
+                </div>
+
+                <button class="box fill grainy" @click="attackRoll">Re-roll {{ attackWarbands }} attack {{ attackWarbands === 1 ? "die" : "dice" }}</button>
+            </section>
+        </div>
+
+        <div class="rows">
+            <section class="result card rows grainy">
+                <div class="cols space-evenly">
+                    <div class="side defence rows box">
+                        <span class="box die-face no-bg">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="4rem" height="4rem">
+                                <path class="st0" d="M96.4,160.4c-12.1,1.7-38.1-29-43.5-39.3-5.5-10.4-15.5-37.5-6.2-46.7,9.4-2.6,50.3-34.8,55.4-34.8s3.1.8,4.3,1.5c3.9,2.1,44.6,34.4,47.5,37.7,8.1,9.1-1.2,28.3-6.4,37.8s-18.8,25.1-30.7,32.9c-2.7,1.8-18.4,10.7-20.5,11ZM103.3,141.8c8.6-1,27.4-24.3,31.6-32.2s8.5-15,5-19.7c-5.1-2.5-32.1-28.3-34.3-28.4s-1.9.5-2.2,1.6c-.3,13.6-.5,27.4-1.2,41.1s-4.6,33.7-1.5,36.7,1.4,1,2.7.8Z"/>
+                            </svg>
+                        </span>
+                        <span>
+                            {{ defenceResult.value }}
+                        </span>
+                    </div>
+                    <div class="side attack rows box">
+                        <span class="box die-face no-bg">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200" width="4rem" height="4rem">
+                                <path d="M101.8,71.7c15.7-16,33.3-30.5,56.2-33.9-10,36.6-37.9,60.2-62.6,86.9-1.1,4.8,15.1,11.5,12.1,18.9s-4.2,4.5-5.1,4.7c-8.7,2.5-15.3-13.6-22.3-17.2-1.2.2-13.8,16.3-14.8,18.2-2.5,4.7-1.8,12.4-7.8,12.8s-16.6-10.5-15.7-15.6c1.5-7.7,25.7-21.5,25.1-26.9-.5-4.2-29.3-20.5-14.5-26.2s14.8,15.1,22.2,11.5,11.4-15.8,13.7-18.6c4.2-5.1,8.6-9.9,13.3-14.6Z"/>
+                            </svg>
+                        </span>
+                        <span>
+                            {{ attackResult.value + campaignResult.sacrifice }}
+                        </span>
+                    </div>
+                </div>
+
+                <button class="box" @click="campaignRoll">Re-roll all dice</button>
+            </section>
+
+            <section class="card rows box outcome grainy" :class="{ attack: campaignResult.victory, defence: !campaignResult.victory }">
+                <h1 class="victor">{{ campaignResult.victory ? "Attacker" : "Defender" }}</h1>
+                <span><span>is victorious</span><strong class="sacrifice" v-if="campaignResult.sacrifice > 0">, sacrificing {{ campaignResult.sacrifice }} warbands</strong></span>
+            </section>
+        </div>
+    </main>
+
+    <footer class="grainy">
+        <p><strong>Oath Dice Roller</strong> by Ashley Mannix</p>
+        <p>See the <a href="https://github.com/kodraus/oath-dice-roller">GitHub</a> page for more details</p>
+    </footer>
+
+    <script>
+        /*
+        An implementation of Oath's campaign dice rolls.
+
+        This code is Vue-independent so can be pulled out and used elsewhere.
+        */
+        function rollDefence(pool) {
+            const die = [
+                (v) => v.blank += 1,
+                (v) => v.blank += 1,
+                (v) => v.one += 1,
+                (v) => v.one += 1,
+                (v) => v.two += 1,
+                (v) => v.double += 1,
+            ];
+
+            const result = {
+                blank: 0,
+                one: 0,
+                two: 0,
+                double: 0,
+            };
+
+            for (let i = 0; i < pool; i++) {
+                (die[Math.floor((Math.random() * die.length))])(result);
+            }
+
+            return result;
+        }
+
+        function computeDefence(warbands, pool) {
+            let defence = 0;
+
+            defence += pool.one;
+            defence += pool.two * 2;
+            defence *= pool.double > 0 ? Math.pow(pool.double, 2) : 1;
+            defence += warbands;
+
+            return {
+                value: defence,
+            };
+        }
+
+        function rollAttack(pool) {
+            const die = [
+                (v) => v.hollow += 1,
+                (v) => v.hollow += 1,
+                (v) => v.hollow += 1,
+                (v) => v.one += 1,
+                (v) => v.one += 1,
+                (v) => v.skull += 1,
+            ];
+
+            const result = {
+                hollow: 0,
+                one: 0,
+                skull: 0,
+            };
+
+            for (let i = 0; i < pool; i++) {
+                (die[Math.floor((Math.random() * die.length))])(result);
+            }
+
+            return result;
+        }
+
+        function computeAttack(warbands, pool) {
+            let attack = 0;
+
+            attack += Math.floor(pool.hollow / 2);
+            attack += pool.one;
+            attack += pool.skull * 2;
+
+            let sacrifice = warbands > pool.skull
+                ? warbands - pool.skull
+                : 0;
+
+            return {
+                value: attack,
+                sacrifice,
+            };
+        }
+
+        function computeVictory(defence, attack, sacrifice) {
+            // If the attack is already greater than the defence
+            if (attack.value > defence.value) {
+                return {
+                    victory: true,
+                    sacrifice: 0,
+                };
+            }
+
+            // If the attack can exceed the defence by sacrificing warbands
+            if (sacrifice && (attack.value + attack.sacrifice) > defence.value) {
+                return {
+                    victory: true,
+                    sacrifice: defence.value - attack.value + 1,
+                };
+            }
+
+            // If the attack cannot exceed the defence
+            return {
+                victory: false,
+                sacrifice: 0,
+            }
+        }
+
+        /*
+        The dice roller app itself.
+        */
+        const { createApp } = Vue;
+
+        createApp({
+            setup() {
+                const defenceDice = Vue.ref(3);
+                const defenceWarbands = Vue.ref(3);
+                const defencePool = Vue.ref(rollDefence(3));
+                const defenceRoll = () => {
+                    defencePool.value = rollDefence(defenceDice.value);
+                };
+
+                const attackWarbands = Vue.ref(6);
+                const attackPool = Vue.ref(rollAttack(6));
+                const attackRoll = () => {
+                    attackPool.value = rollAttack(attackWarbands.value);
+                };
+                const attackSacrifice = Vue.ref(true);
+
+                const defenceResult = Vue.computed(() => computeDefence(defenceWarbands.value, defencePool.value));
+                const attackResult = Vue.computed(() => computeAttack(attackWarbands.value, attackPool.value));
+                const campaignResult = Vue.computed(() => computeVictory(
+                    defenceResult.value,
+                    attackResult.value,
+                    attackSacrifice.value,
+                ));
+
+                const campaignRoll = () => {
+                    defenceRoll();
+                    attackRoll();
+                };
+
+                const dec = (v) => Math.max(0, v - 1);
+                const inc = (v) => v + 1;
+
+                return {
+                    defenceDice,
+                    defenceWarbands,
+                    defencePool,
+                    defenceRoll,
+                    attackWarbands,
+                    attackPool,
+                    attackSacrifice,
+                    attackRoll,
+                    defenceResult,
+                    attackResult,
+                    campaignRoll,
+                    campaignResult,
+                    dec,
+                    inc,
+                }
+            }
+        }).mount('#app')
+    </script>
+  </body>
+</html>
