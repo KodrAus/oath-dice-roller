@@ -800,7 +800,7 @@
           <span
             ><span>is victorious</span
             ><strong class="sacrifice" v-if="campaignResult.sacrifice > 0"
-              >, sacrificing {{ campaignResult.sacrifice }} warbands</strong
+              >, sacrificing {{ campaignResult.sacrifice }} {{ campaignResult.sacrifice === 1 ? "warband" : "warbands" }}</strong
             ></span
           >
         </section>
