@@ -247,7 +247,7 @@
         }
 
         input[type="number"] {
-            -moz-appearance:textfield;
+            -moz-appearance: textfield;
         }
 
         input[type="checkbox"] {
@@ -312,7 +312,7 @@
                 <div class="cols">
                     <div class="cols">
                         <input id="defence-dice" type="number" pattern="\d*" min="0" v-model="defenceDice" />
-                        <label for="defence-dice">Pool</label>
+                        <label for="defence-dice">Defence pool</label>
                     </div>
                     <div class="cols">
                         <button class="box die-face fill grainy" @click="defenceDice = dec(defenceDice)" title="Subtract defence die">-</button>
@@ -532,6 +532,8 @@
             defence += pool.one;
             defence += pool.two * 2;
             defence *= pool.double > 0 ? Math.pow(pool.double, 2) : 1;
+
+            // Warbands are added to defence, but aren't affected by doubles
             defence += warbands;
 
             return {
@@ -569,6 +571,11 @@
             attack += pool.one;
             attack += pool.skull * 2;
 
+            // We can only sacrifice warbands that aren't already
+            // removed by skull rolls
+            //
+            // This value isn't added to the rolled value because an
+            // attacker may not want to sacrifice warbands for victory
             let sacrifice = warbands > pool.skull
                 ? warbands - pool.skull
                 : 0;
@@ -606,10 +613,10 @@
         /*
         The dice roller app itself.
         */
-        const { createApp } = Vue;
 
-        createApp({
+        Vue.createApp({
             setup() {
+                // Defence properties
                 const defenceDice = Vue.ref(3);
                 const defenceWarbands = Vue.ref(3);
                 const defencePool = Vue.ref(rollDefence(3));
@@ -617,6 +624,7 @@
                     defencePool.value = rollDefence(defenceDice.value);
                 };
 
+                // Attack properties
                 const attackWarbands = Vue.ref(6);
                 const attackPool = Vue.ref(rollAttack(6));
                 const attackRoll = () => {
@@ -624,6 +632,7 @@
                 };
                 const attackSacrifice = Vue.ref(true);
 
+                // Outcome properties
                 const defenceResult = Vue.computed(() => computeDefence(defenceWarbands.value, defencePool.value));
                 const attackResult = Vue.computed(() => computeAttack(attackWarbands.value, attackPool.value));
                 const campaignResult = Vue.computed(() => computeVictory(
@@ -631,12 +640,12 @@
                     attackResult.value,
                     attackSacrifice.value,
                 ));
-
                 const campaignRoll = () => {
                     defenceRoll();
                     attackRoll();
                 };
 
+                // These helpers just ensure we don't decrement below 0
                 const dec = (v) => Math.max(0, v - 1);
                 const inc = (v) => v + 1;
 
