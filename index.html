@@ -198,12 +198,14 @@
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
       }
 
-      .die-face svg {
-        opacity: 0.95;
-      }
+      @supports not (-webkit-touch-callout: none) {
+        .die-face svg {
+          opacity: 0.95;
+        }
 
-      .die-face path {
-        filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 200 200' height='0' %3E%3Cfilter id='die-face-inset-shadow'%3E%3CfeOffset dx='2' dy='2' /%3E%3CfeGaussianBlur stdDeviation='3' result='offset-blur' /%3E%3CfeComposite operator='out' in='SourceGraphic' in2='offset-blur' result='inverse' /%3E%3CfeFlood flood-color='black' flood-opacity='0.5' result='color' /%3E%3CfeComposite operator='in' in='color' in2='inverse' result='shadow' /%3E%3CfeComposite operator='over' in='shadow' in2='SourceGraphic' /%3E%3C/filter%3E%3C/svg%3E#die-face-inset-shadow");
+        .die-face path {
+          filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 200 200' height='0' %3E%3Cfilter id='die-face-inset-shadow'%3E%3CfeOffset dx='2' dy='2' /%3E%3CfeGaussianBlur stdDeviation='3' result='offset-blur' /%3E%3CfeComposite operator='out' in='SourceGraphic' in2='offset-blur' result='inverse' /%3E%3CfeFlood flood-color='black' flood-opacity='0.5' result='color' /%3E%3CfeComposite operator='in' in='color' in2='inverse' result='shadow' /%3E%3CfeComposite operator='over' in='shadow' in2='SourceGraphic' /%3E%3C/filter%3E%3C/svg%3E#die-face-inset-shadow");
+        }
       }
 
       .no-bg {
