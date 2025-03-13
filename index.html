@@ -837,7 +837,7 @@
 
         defence += pool.one;
         defence += pool.two * 2;
-        defence *= pool.double > 0 ? Math.pow(pool.double, 2) : 1;
+        defence *= Math.pow(pool.double + 1, 2);
 
         // Warbands are added to defence, but aren't affected by doubles
         defence += warbands;
