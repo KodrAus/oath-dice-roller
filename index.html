@@ -820,7 +820,7 @@
             {{ campaignResult.victory ? "Attacker" : "Defender" }}
           </h1>
 
-          <span v-if="campaignResult.sacrificed > 0">The attacker needed to sacrifice <em>{{ campaignResult.sacrificed }}</em> {{ campaignResult.sacrificed === 1 ? "warband" : "warbands" }} to win.</span>
+          <span v-if="campaignResult.sacrificed > 0">The attacker needed to sacrifice <button @click="attackSacrifice = campaignResult.sacrificed">{{ campaignResult.sacrificed }} {{ campaignResult.sacrificed === 1 ? "warband" : "warbands" }}</button> to win.</span>
 
           <span v-if="campaignResult.sacrificable > 0">The attacker can <button @click="attackSacrifice += campaignResult.sacrificable">sacrifice {{ campaignResult.sacrificable }} {{ attackResult.sacrificed > 0 ? "more " : "" }} {{ campaignResult.sacrificable === 1 ? "warband" : "warbands" }}</button> to win.</span>
 
