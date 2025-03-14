@@ -783,6 +783,7 @@
                   width="4rem"
                   height="4rem"
                 >
+                  <title>Defence</title>
                   <path
                     class="st0"
                     d="M96.4,160.4c-12.1,1.7-38.1-29-43.5-39.3-5.5-10.4-15.5-37.5-6.2-46.7,9.4-2.6,50.3-34.8,55.4-34.8s3.1.8,4.3,1.5c3.9,2.1,44.6,34.4,47.5,37.7,8.1,9.1-1.2,28.3-6.4,37.8s-18.8,25.1-30.7,32.9c-2.7,1.8-18.4,10.7-20.5,11ZM103.3,141.8c8.6-1,27.4-24.3,31.6-32.2s8.5-15,5-19.7c-5.1-2.5-32.1-28.3-34.3-28.4s-1.9.5-2.2,1.6c-.3,13.6-.5,27.4-1.2,41.1s-4.6,33.7-1.5,36.7,1.4,1,2.7.8Z"
@@ -799,7 +800,9 @@
                   viewBox="0 0 200 200"
                   width="4rem"
                   height="4rem"
+                  title="Attack"
                 >
+                  <title>Attack</title>
                   <path
                     d="M101.8,71.7c15.7-16,33.3-30.5,56.2-33.9-10,36.6-37.9,60.2-62.6,86.9-1.1,4.8,15.1,11.5,12.1,18.9s-4.2,4.5-5.1,4.7c-8.7,2.5-15.3-13.6-22.3-17.2-1.2.2-13.8,16.3-14.8,18.2-2.5,4.7-1.8,12.4-7.8,12.8s-16.6-10.5-15.7-15.6c1.5-7.7,25.7-21.5,25.1-26.9-.5-4.2-29.3-20.5-14.5-26.2s14.8,15.1,22.2,11.5,11.4-15.8,13.7-18.6c4.2-5.1,8.6-9.9,13.3-14.6Z"
                   />
@@ -821,8 +824,15 @@
           </h1>
 
           <span
-            v-if="campaignResult.sacrificed !== undefined && campaignResult.sacrificed !== attackSacrifice"
-            >The attacker only needs to
+            v-if="campaignResult.sacrificed > 0 && campaignResult.sacrificed === attackSacrifice"
+            >Attacker sacrifices {{ campaignResult.sacrificed }} {{
+            campaignResult.sacrificed === 1 ? "warband" : "warbands" }} to
+            win.</span
+          >
+
+          <span
+            v-if="campaignResult.sacrificed > 0 && campaignResult.sacrificed !== attackSacrifice"
+            >Attacker only needs to
             <button @click="attackSacrifice = campaignResult.sacrificed">
               sacrifice {{ campaignResult.sacrificed }} {{
               campaignResult.sacrificed === 1 ? "warband" : "warbands" }}
@@ -831,14 +841,16 @@
           >
 
           <span
-            v-if="campaignResult.sacrificed > 0 && campaignResult.sacrificed === attackSacrifice"
-            >The attacker needs to sacrifice {{ campaignResult.sacrificed }} {{
-            campaignResult.sacrificed === 1 ? "warband" : "warbands" }} to
-            win.</span
+            v-if="campaignResult.sacrificed === 0 && campaignResult.sacrificed !== attackSacrifice"
+            >Attacker can
+            <button @click="attackSacrifice = campaignResult.sacrificed">
+              sacrifice no warbands
+            </button>
+            to win.</span
           >
 
           <span v-if="campaignResult.sacrificable > 0"
-            >The attacker can
+            >Attacker can
             <button @click="attackSacrifice += campaignResult.sacrificable">
               sacrifice {{ campaignResult.sacrificable }} {{
               attackResult.sacrificed > 0 ? "more " : "" }} {{
@@ -848,7 +860,7 @@
           >
 
           <span v-if="!campaignResult.victory && !campaignResult.sacrificable"
-            >The attacker cannot sacrifice enough warbands to win.</span
+            >Attacker cannot sacrifice enough warbands to win.</span
           >
         </section>
       </div>
@@ -957,7 +969,7 @@
         const victory = attack.value > defence.value;
 
         if (victory) {
-          // The attacker won
+          // Attacker won
 
           // Compute the number of warbands that needed to be sacrificed
           let sacrificed = Math.max(0, defence.value - attack.base + 1);
@@ -967,7 +979,7 @@
             sacrificed,
           };
         } else {
-          // The attacker didn't win
+          // Attacker didn't win
 
           // Compute the number of additional warbands that could be
           // sacrificed to win. If there's no way the attacker can win
@@ -991,16 +1003,16 @@
       Vue.createApp({
         setup() {
           // Defence properties
-          const defenceDice = Vue.ref(3);
-          const defenceWarbands = Vue.ref(3);
-          const defencePool = Vue.ref(rollDefence(3));
+          const defenceDice = Vue.ref(0);
+          const defenceWarbands = Vue.ref(0);
+          const defencePool = Vue.ref(rollDefence(0));
           const defenceRoll = () => {
             defencePool.value = rollDefence(defenceDice.value);
           };
 
           // Attack properties
-          const attackWarbands = Vue.ref(6);
-          const attackPool = Vue.ref(rollAttack(6));
+          const attackWarbands = Vue.ref(0);
+          const attackPool = Vue.ref(rollAttack(0));
           const attackRoll = () => {
             attackPool.value = rollAttack(attackWarbands.value);
           };
