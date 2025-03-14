@@ -820,11 +820,36 @@
             {{ campaignResult.victory ? "Attacker" : "Defender" }}
           </h1>
 
-          <span v-if="campaignResult.sacrificed > 0">The attacker needed to sacrifice <button @click="attackSacrifice = campaignResult.sacrificed">{{ campaignResult.sacrificed }} {{ campaignResult.sacrificed === 1 ? "warband" : "warbands" }}</button> to win.</span>
+          <span
+            v-if="campaignResult.sacrificed !== undefined && campaignResult.sacrificed !== attackSacrifice"
+            >The attacker only needs to
+            <button @click="attackSacrifice = campaignResult.sacrificed">
+              sacrifice {{ campaignResult.sacrificed }} {{
+              campaignResult.sacrificed === 1 ? "warband" : "warbands" }}
+            </button>
+            to win.</span
+          >
 
-          <span v-if="campaignResult.sacrificable > 0">The attacker can <button @click="attackSacrifice += campaignResult.sacrificable">sacrifice {{ campaignResult.sacrificable }} {{ attackResult.sacrificed > 0 ? "more " : "" }} {{ campaignResult.sacrificable === 1 ? "warband" : "warbands" }}</button> to win.</span>
+          <span
+            v-if="campaignResult.sacrificed > 0 && campaignResult.sacrificed === attackSacrifice"
+            >The attacker needs to sacrifice {{ campaignResult.sacrificed }} {{
+            campaignResult.sacrificed === 1 ? "warband" : "warbands" }} to
+            win.</span
+          >
 
-          <span v-if="!campaignResult.victory && !campaignResult.sacrificable">The attacker cannot sacrifice enough warbands to win.</span>
+          <span v-if="campaignResult.sacrificable > 0"
+            >The attacker can
+            <button @click="attackSacrifice += campaignResult.sacrificable">
+              sacrifice {{ campaignResult.sacrificable }} {{
+              attackResult.sacrificed > 0 ? "more " : "" }} {{
+              campaignResult.sacrificable === 1 ? "warband" : "warbands" }}
+            </button>
+            to win.</span
+          >
+
+          <span v-if="!campaignResult.victory && !campaignResult.sacrificable"
+            >The attacker cannot sacrifice enough warbands to win.</span
+          >
         </section>
       </div>
     </main>
@@ -932,29 +957,30 @@
         const victory = attack.value > defence.value;
 
         if (victory) {
-            // The attacker won
+          // The attacker won
 
-            // Compute the number of warbands that needed to be sacrificed
-            let sacrificed = Math.max(0, defence.value - attack.base + 1);
+          // Compute the number of warbands that needed to be sacrificed
+          let sacrificed = Math.max(0, defence.value - attack.base + 1);
 
-            return {
-                victory,
-                sacrificed,
-            }
+          return {
+            victory,
+            sacrificed,
+          };
         } else {
-            // The attacker didn't win
+          // The attacker didn't win
 
-            // Compute the number of additional warbands that could be
-            // sacrificed to win. If there's no way the attacker can win
-            // then this value will be null
-            let sacrificable = (attack.value + attack.sacrificable > defence.value)
-                ? defence.value - attack.value + 1
-                : null;
+          // Compute the number of additional warbands that could be
+          // sacrificed to win. If there's no way the attacker can win
+          // then this value will be null
+          let sacrificable =
+            attack.value + attack.sacrificable > defence.value
+              ? defence.value - attack.value + 1
+              : null;
 
-            return {
-                victory,
-                sacrificable,
-            };
+          return {
+            victory,
+            sacrificable,
+          };
         }
       }
 
@@ -985,13 +1011,14 @@
             computeDefence(defenceWarbands.value, defencePool.value),
           );
           const attackResult = Vue.computed(() =>
-            computeAttack(attackWarbands.value, attackSacrifice.value, attackPool.value),
+            computeAttack(
+              attackWarbands.value,
+              attackSacrifice.value,
+              attackPool.value,
+            ),
           );
           const campaignResult = Vue.computed(() =>
-            computeVictory(
-              defenceResult.value,
-              attackResult.value,
-            ),
+            computeVictory(defenceResult.value, attackResult.value),
           );
           const campaignRoll = () => {
             defenceRoll();
