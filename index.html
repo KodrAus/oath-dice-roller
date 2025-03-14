@@ -600,13 +600,33 @@
             </div>
           </div>
 
-          <div class="cols space-end">
-            <label for="attack-sacrifice">Sacrifice warbands?</label>
-            <input
-              id="attack-sacrifice"
-              type="checkbox"
-              v-model="attackSacrifice"
-            />
+          <div class="cols">
+            <div class="cols">
+              <input
+                id="attack-sacrifice"
+                type="number"
+                pattern="\d*"
+                min="0"
+                v-model="attackSacrifice"
+              />
+              <label for="attack-sacrifice">Sacrifice</label>
+            </div>
+            <div class="cols">
+              <button
+                class="box die-face fill grainy"
+                @click="attackSacrifice = dec(attackSacrifice)"
+                title="Subtract sacrificed warband"
+              >
+                -
+              </button>
+              <button
+                class="box die-face fill grainy"
+                @click="attackSacrifice = inc(attackSacrifice)"
+                title="Add sacrificed warband"
+              >
+                +
+              </button>
+            </div>
           </div>
         </section>
 
@@ -785,7 +805,7 @@
                   />
                 </svg>
               </span>
-              <span> {{ attackResult.value + campaignResult.sacrifice }} </span>
+              <span> {{ attackResult.value }} </span>
             </div>
           </div>
 
@@ -799,13 +819,12 @@
           <h1 class="victor">
             {{ campaignResult.victory ? "Attacker" : "Defender" }}
           </h1>
-          <span
-            ><span>is victorious</span
-            ><strong class="sacrifice" v-if="campaignResult.sacrifice > 0"
-              >, sacrificing {{ campaignResult.sacrifice }} {{
-              campaignResult.sacrifice === 1 ? "warband" : "warbands" }}</strong
-            ></span
-          >
+
+          <span v-if="campaignResult.sacrificed > 0">The attacker needed to sacrifice <em>{{ campaignResult.sacrificed }}</em> {{ campaignResult.sacrificed === 1 ? "warband" : "warbands" }} to win.</span>
+
+          <span v-if="campaignResult.sacrificable > 0">The attacker can <button @click="attackSacrifice += campaignResult.sacrificable">sacrifice {{ campaignResult.sacrificable }} {{ attackResult.sacrificed > 0 ? "more " : "" }} {{ campaignResult.sacrificable === 1 ? "warband" : "warbands" }}</button> to win.</span>
+
+          <span v-if="!campaignResult.victory && !campaignResult.sacrificable">The attacker cannot sacrifice enough warbands to win.</span>
         </section>
       </div>
     </main>
@@ -887,7 +906,7 @@
         return result;
       }
 
-      function computeAttack(warbands, pool) {
+      function computeAttack(warbands, sacrifice, pool) {
         let attack = 0;
 
         attack += Math.floor(pool.hollow / 2);
@@ -896,39 +915,47 @@
 
         // We can only sacrifice warbands that aren't already
         // removed by skull rolls
-        //
-        // This value isn't added to the rolled value because an
-        // attacker may not want to sacrifice warbands for victory
-        let sacrifice = warbands > pool.skull ? warbands - pool.skull : 0;
+        let sacrificable = warbands > pool.skull ? warbands - pool.skull : 0;
+
+        sacrificed = Math.min(sacrifice, sacrificable);
+        sacrificable = sacrificable - sacrificed;
 
         return {
-          value: attack,
-          sacrifice,
+          value: attack + sacrificed,
+          base: attack,
+          sacrificed,
+          sacrificable,
         };
       }
 
-      function computeVictory(defence, attack, sacrifice) {
-        // If the attack is already greater than the defence
-        if (attack.value > defence.value) {
-          return {
-            victory: true,
-            sacrifice: 0,
-          };
-        }
+      function computeVictory(defence, attack) {
+        const victory = attack.value > defence.value;
 
-        // If the attack can exceed the defence by sacrificing warbands
-        if (sacrifice && attack.value + attack.sacrifice > defence.value) {
-          return {
-            victory: true,
-            sacrifice: defence.value - attack.value + 1,
-          };
-        }
+        if (victory) {
+            // The attacker won
 
-        // If the attack cannot exceed the defence
-        return {
-          victory: false,
-          sacrifice: 0,
-        };
+            // Compute the number of warbands that needed to be sacrificed
+            let sacrificed = Math.max(0, defence.value - attack.base + 1);
+
+            return {
+                victory,
+                sacrificed,
+            }
+        } else {
+            // The attacker didn't win
+
+            // Compute the number of additional warbands that could be
+            // sacrificed to win. If there's no way the attacker can win
+            // then this value will be null
+            let sacrificable = (attack.value + attack.sacrificable > defence.value)
+                ? defence.value - attack.value + 1
+                : null;
+
+            return {
+                victory,
+                sacrificable,
+            };
+        }
       }
 
       /*
@@ -951,20 +978,19 @@
           const attackRoll = () => {
             attackPool.value = rollAttack(attackWarbands.value);
           };
-          const attackSacrifice = Vue.ref(true);
+          const attackSacrifice = Vue.ref(0);
 
           // Outcome properties
           const defenceResult = Vue.computed(() =>
             computeDefence(defenceWarbands.value, defencePool.value),
           );
           const attackResult = Vue.computed(() =>
-            computeAttack(attackWarbands.value, attackPool.value),
+            computeAttack(attackWarbands.value, attackSacrifice.value, attackPool.value),
           );
           const campaignResult = Vue.computed(() =>
             computeVictory(
               defenceResult.value,
               attackResult.value,
-              attackSacrifice.value,
             ),
           );
           const campaignRoll = () => {
