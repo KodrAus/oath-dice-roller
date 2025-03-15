@@ -6,14 +6,29 @@
 
     <title>Oath Dice Roller</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Metamorphous&family=Sorts+Mill+Goudy:ital@0;1&display=swap"
-      rel="stylesheet"
-    />
-
     <style>
+      @font-face {
+        font-family: "Metamorphous";
+        src:
+          local("Metamorphous"),
+          url("./asset/Metamorphous/Metamorphous-Regular.ttf");
+      }
+
+      @font-face {
+        font-family: "Sorts Mill Goudy";
+        src:
+          local("Sorts Mill Goudy"),
+          url("./asset/Sorts_Mill_Goudy/SortsMillGoudy-Regular.ttf");
+      }
+
+      @font-face {
+        font-family: "Sorts Mill Goudy";
+        src:
+          local("Sorts Mill Goudy"),
+          url("./asset/Sorts_Mill_Goudy/SortsMillGoudy-Italic.ttf");
+        font-style: italic;
+      }
+
       html * {
         box-sizing: border-box;
       }
@@ -334,7 +349,7 @@
     </style>
   </head>
   <body>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="./asset/vue.global.prod.js"></script>
 
     <main id="app" class="rows">
       <div class="rows defence">
